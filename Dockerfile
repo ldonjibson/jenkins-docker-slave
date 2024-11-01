@@ -1,31 +1,27 @@
-FROM ubuntu:18.04
+FROM ubuntu:24.04
 
-# Make sure the package repository is up to date.
+# Update package repository and install necessary packages
 RUN apt-get update && \
-    apt-get install -qy git && \
-# Install a basic SSH server
-    apt-get install -qy openssh-server && \
+    apt-get install -qy git openssh-server default-jdk maven python3.12 python3.12-dev python3.12-venv python3-pip && \
+    # Configure SSH
     sed -i 's|session    required     pam_loginuid.so|session    optional     pam_loginuid.so|g' /etc/pam.d/sshd && \
     mkdir -p /var/run/sshd && \
-# Install JDK 11
-    apt-get install -qy default-jdk && \
-# Install maven
-    apt-get install -qy maven && \
-# Cleanup old packages
-    apt-get -qy autoremove && \
-# Add user jenkins to the image
+    # Add user jenkins to the image
     adduser --quiet jenkins && \
-# Set password for the jenkins user (you may want to alter this).
     echo "jenkins:password" | chpasswd && \
-    mkdir /home/jenkins/.m2
+    mkdir -p /home/jenkins/.m2 /home/jenkins/.ssh && \
+    # Cleanup
+    apt-get -qy autoremove && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy authorized keys
 COPY .ssh/authorized_keys /home/jenkins/.ssh/authorized_keys
 
-RUN chown -R jenkins:jenkins /home/jenkins/.m2/ && \
-    chown -R jenkins:jenkins /home/jenkins/.ssh/
+# Set permissions
+RUN chown -R jenkins:jenkins /home/jenkins/.m2 /home/jenkins/.ssh
 
 # Standard SSH port
 EXPOSE 22
 
+# Start SSH server
 CMD ["/usr/sbin/sshd", "-D"]
