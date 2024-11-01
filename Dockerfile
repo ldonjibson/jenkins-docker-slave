@@ -17,12 +17,20 @@ RUN apt-get update && \
 # Copy authorized keys
 COPY .ssh/authorized_keys /home/jenkins/.ssh/authorized_keys
 
-# Set permissions
-RUN chown -R jenkins:jenkins /home/jenkins/.m2 /home/jenkins/.ssh
+# Set permissions for jenkins home directories
+RUN chown -R jenkins:jenkins /home/jenkins/.m2 /home/jenkins/.ssh && \
+    chmod 700 /home/jenkins/.ssh && \
+    chmod 600 /home/jenkins/.ssh/authorized_keys
 
 # Copy requirements.txt and install Python dependencies
 COPY xx.txt /tmp/requirements.txt
-RUN python3.12 -m pip install -r /tmp/requirements.txt
+
+# Create a virtual environment and install dependencies
+RUN python3.12 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Set the PATH to include the virtual environment
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Standard SSH port
 EXPOSE 22
