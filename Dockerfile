@@ -20,6 +20,10 @@ COPY .ssh/authorized_keys /home/jenkins/.ssh/authorized_keys
 # Set permissions
 RUN chown -R jenkins:jenkins /home/jenkins/.m2 /home/jenkins/.ssh
 
+# Copy requirements.txt and install Python dependencies
+COPY requirements.txt /tmp/requirements.txt
+RUN python3.12 -m pip install -r /tmp/requirements.txt
+
 # Standard SSH port
 EXPOSE 22
 
