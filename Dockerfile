@@ -27,6 +27,7 @@ COPY xx.txt /tmp/requirements.txt
 
 # Create a virtual environment and install dependencies
 RUN python3.12 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --no-cache-dir --upgrade pip && \
     /opt/venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Set the PATH to include the virtual environment
